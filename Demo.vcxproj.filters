@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="mlibutil">
+      <UniqueIdentifier>{869696ee-8380-4ae3-b5c6-22a447f4670a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{4e3976d4-5382-4814-bb4c-21a1e1fa2096}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ceres">
+      <UniqueIdentifier>{2a38e9fe-bd18-43f4-a22d-0b5d68dcca53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dlib">
+      <UniqueIdentifier>{7eaed75f-a053-4de5-92b4-7bc18c3f9d1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="reader">
+      <UniqueIdentifier>{02eeb70d-52c0-411b-9348-d8954f47ac7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Eigen">
+      <UniqueIdentifier>{b9c258a4-1ed3-4c26-b035-af99eb9e7838}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mlibutil\mlibutil.cpp">
+      <Filter>mlibutil</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\geometryengine.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\mainwidget.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\mainwindow.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="ceres\ceres_initialization.cpp">
+      <Filter>ceres</Filter>
+    </ClCompile>
+    <ClCompile Include="ceres\ceres_motion.cpp">
+      <Filter>ceres</Filter>
+    </ClCompile>
+    <ClCompile Include="ceres\ceres_param.cpp">
+      <Filter>ceres</Filter>
+    </ClCompile>
+    <ClCompile Include="ceres\ceres_track.cpp">
+      <Filter>ceres</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\thirdparty2015\dlib\dlib\all\source.cpp">
+      <Filter>dlib</Filter>
+    </ClCompile>
+    <ClCompile Include="dem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dem1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parameters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="mlibutil\mlibutil.h">
+      <Filter>mlibutil</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\geometryengine.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="ceres\ceres_initialization.h">
+      <Filter>ceres</Filter>
+    </ClInclude>
+    <ClInclude Include="ceres\ceres_motion.h">
+      <Filter>ceres</Filter>
+    </ClInclude>
+    <ClInclude Include="ceres\ceres_param.h">
+      <Filter>ceres</Filter>
+    </ClInclude>
+    <ClInclude Include="ceres\ceres_track.h">
+      <Filter>ceres</Filter>
+    </ClInclude>
+    <ClInclude Include="dlib\dlib_face_detector.h">
+      <Filter>dlib</Filter>
+    </ClInclude>
+    <ClInclude Include="reader\image_reader.h">
+      <Filter>reader</Filter>
+    </ClInclude>
+    <ClInclude Include="reader\image_reader_kinect.h">
+      <Filter>reader</Filter>
+    </ClInclude>
+    <ClInclude Include="reader\model_reader.h">
+      <Filter>reader</Filter>
+    </ClInclude>
+    <ClInclude Include="Eigen\eigen_binary_io.h">
+      <Filter>Eigen</Filter>
+    </ClInclude>
+    <ClInclude Include="dem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dem1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="gui\mainwidget.h">
+      <Filter>gui</Filter>
+    </QtMoc>
+    <QtMoc Include="gui\mainwindow.h">
+      <Filter>gui</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gui\fshader.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="gui\vshader.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="gui\shaders.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+  </ItemGroup>
+</Project>
