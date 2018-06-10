@@ -58,6 +58,8 @@ MainWidget::~MainWidget()
     makeCurrent();
     delete geometries;
     doneCurrent();
+
+	//program = new QOpenGLShaderProgram;
 }
 
 void MainWidget::initializeGL()
@@ -75,7 +77,7 @@ void MainWidget::initializeGL()
     glEnable(GL_CULL_FACE);
 //! [2]
 
-    geometries = new GeometryEngine;
+	geometries = new GeometryEngine;
 
     // Use QBasicTimer because its faster than QTimer
     timer.start(12, this);
@@ -109,14 +111,14 @@ void MainWidget::resizeGL(int w, int h)
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
     // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 3.0, zFar = 10000.0, fov = 45.0;
+    const qreal zNear = 40.0, zFar = 1000.0, fov = 45.0;
 
     // Reset projection
 	projection.setToIdentity();
     // Set perspective projection
     projection.perspective(fov, aspect, zNear, zFar);
 	//
-	view.lookAt(QVector3D(0, 0, 0), QVector3D(0, 0, 1000), QVector3D(0, 1, 0));
+	view.lookAt(QVector3D(0, 0, 0), QVector3D(0, 0, 1), QVector3D(0, 1, 0));
 	//
 	QVector3D lightPos(0, 0, 0);
 	program.setUniformValue("lightPos", lightPos);
@@ -135,13 +137,19 @@ void MainWidget::paintGL()
 	geometries->drawFaceGeometry(&program);
 }
 
-void MainWidget::updateFaceGeometry(Eigen::VectorXf &pos, Eigen::VectorXf &nor, Eigen::VectorXf &ind)
+void MainWidget::updateFaceGeometry(Eigen::MatrixXd &pos, QVector3D &trans, QQuaternion &Quat)
 {
 	// Calculate model view transformation
 	model.setToIdentity();
-	model.translate(0.0, 0.0, 500);
+	model.translate(trans);
+	model.rotate(Quat);
 	model.rotate(10, QVector3D(0, 1, 0));
 
-	geometries->updateFaceGeometry(pos, nor, ind);
+	static bool first = true;
+	if (first) {
+		first = false;
+		geometries->setConstant();
+	}
+	geometries->updateFaceGeometry(pos);
 	update();
 }

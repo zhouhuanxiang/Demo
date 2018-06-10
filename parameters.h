@@ -2,6 +2,7 @@
 #define PARAMETERS_
 
 #define USE_KINECT 0
+#define USE_LAPTOP 0
 
 #include <set>
 #include <vector>
@@ -45,6 +46,7 @@ const int frame_count_begin = 25;
 const int frame_count_end = 400;
 
 const int vertex_size = 3223;
+const int face_size = 6226;
 const int pca_size = 50;
 const int exp_size = 33 - 6;
 const int eye_exp_size = 8;
@@ -72,6 +74,15 @@ extern std::vector<int> useless_expression;
 extern std::vector<int> eye_expression;
 extern std::vector<int> mouth_expression;
 
-const int motion_param_size = 10;
+const int frame_size = 10;
+
+#if USE_KINECT
+TODO
+#else
+const int cframe_width = 1344;
+const int cframe_height = 760;
+const int dframe_width = 224;
+const int dframe_height = 172;
+#endif
 
 #endif

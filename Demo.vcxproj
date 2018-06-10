@@ -127,6 +127,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mlibutil\mlibutil.cpp" />
     <ClCompile Include="parameters.cpp" />
+    <ClCompile Include="threadmanager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ceres\ceres_initialization.h" />
@@ -135,9 +136,10 @@
     <ClInclude Include="ceres\ceres_track.h" />
     <ClInclude Include="dem.h" />
     <ClInclude Include="dem1.h" />
-    <ClInclude Include="dlib\dlib_face_detector.h" />
+    <ClInclude Include="dlib\dlib_landmark_detector.h" />
     <ClInclude Include="Eigen\eigen_binary_io.h" />
     <ClInclude Include="gui\geometryengine.h" />
+    <ClInclude Include="threadmanager.h" />
     <ClInclude Include="parameters.h" />
     <ClInclude Include="reader\image_reader.h" />
     <ClInclude Include="reader\image_reader_kinect.h" />

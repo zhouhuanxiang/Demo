@@ -1,8 +1,6 @@
 #include "parameters.h"
 using namespace std;
 
-#define USE_LAPTOP 0
-
 #if USE_LAPTOP
 	string Desktop_Path		= "C:/Users/zhx/Desktop/";
 	string Test_Output_Dir	= "C:/Users/zhx/Desktop/result/";
@@ -15,7 +13,7 @@ using namespace std;
 	#if USE_KINECT
 		string Kinect_Data_Dir	= "F:/Kinect2/new1/";
 	#else
-		string Kinect_Data_Dir = "F:/SunnuMars/zhx2/";
+		string Kinect_Data_Dir = "F:/SunnuMars/zhx3/";
 	#endif
 #endif
 

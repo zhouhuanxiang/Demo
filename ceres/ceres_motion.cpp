@@ -111,8 +111,8 @@ bool CeresMotionLandmarkError::operator()(const T* const R, const T* const tr, T
 		p1[i] = p2[i] + tr[i];
 	}
 	T p3[3];
-	double alpha1 = 0.2;
-	double alpha2 = 1;
+	double alpha1 = 0.5;
+	double alpha2 = 0.5;
 
 	p3[0] = -1.0 * p1[0] / p1[2] * rgb_camera.fx + rgb_camera.cx;
 	p3[1] = -1.0 * p1[1] / p1[2] * rgb_camera.fy + rgb_camera.cy;
@@ -208,13 +208,15 @@ CeresMotionSmoothError::CeresMotionSmoothError(double* p_param, double* pp_param
 template <class T>
 bool CeresMotionSmoothError::operator()(const T* const R, const T* const tr, T* residuals) const
 {
-	T w1 = (T)0.5;
-	T w2 = (T)0.1;
+	T w1 = (T)0.7;
+	T w2 = (T)0.6;
 	for (int i = 0; i < 3; i++) {
-		residuals[i] = w1 * (pp_param[i] + R[i] - 2 * p_param[i]);
+		//residuals[i] = w1 * (pp_param[i] + R[i] - 2 * p_param[i]);
+		residuals[i] = w1 * (R[i] - p_param[i]);
 	}
 	for (int i = 3; i < 6; i++) {
-		residuals[i] = w2 * (pp_param[i] + tr[i - 3] - 2 * p_param[i]);
+		//residuals[i] = w2 * (pp_param[i] + tr[i - 3] - 2 * p_param[i]);
+		residuals[i] = w2 * (tr[i - 3] - p_param[i]);
 	}
 	return true;
 }

@@ -41,6 +41,8 @@
 #ifndef MAINWIDGET_H
 #define MAINWIDGET_H
 
+#include "dem.h"
+
 #include "geometryengine.h"
 
 #include <QOpenGLWidget>
@@ -51,6 +53,7 @@
 #include <QBasicTimer>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
+#include <QGLFormat>
 
 class GeometryEngine;
 
@@ -64,7 +67,7 @@ public:
     explicit MainWidget(QWidget *parent = 0);
     ~MainWidget();
 
-	void updateFaceGeometry(Eigen::VectorXf &pos, Eigen::VectorXf &nor, Eigen::VectorXf &ind);
+	void updateFaceGeometry(Eigen::MatrixXd &pos, QVector3D &trans, QQuaternion &Quat);
 protected:
     void initializeGL() Q_DECL_OVERRIDE;
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;

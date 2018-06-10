@@ -27,7 +27,7 @@ public:
 	DlibLandmarkDetector()
 		:lcount_(-1), fcount_(-1)
 	{
-		deserialize("shape_predictor_68_face_landmarks.dat") >> shape_predictor_;
+		deserialize("../shape_predictor_68_face_landmarks.dat") >> shape_predictor_;
 		pts_.resize(shape_predictor_.num_parts());
 
 		face_detector_ = get_frontal_face_detector();

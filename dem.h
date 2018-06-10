@@ -22,6 +22,9 @@
 
 using namespace Eigen;
 
+extern bool dem_running;
+extern bool dem_init_done;
+
 extern long long track_time_;
 extern long long track_time1_;
 extern long long track_time2_;
@@ -39,10 +42,7 @@ extern MatrixXd delta_B1_eg_;
 extern MatrixXd delta_B2_eg_;
 extern MatrixXd delta_B_eg_;
 
-extern int motion_param_ptr;
-extern bool motion_param_updated;
-extern double motion_param[motion_param_size][6];
-extern double motion_param_tmp[6];
+extern double motion_param[frame_size][6];
 extern Vector3d translation_eg_;
 extern Matrix<double, 3, 3> rotation_eg_;
 extern cv::Mat translation_cv_;
@@ -53,22 +53,24 @@ extern MatrixXd xx_coeff_eg_, xxx_coeff_eg_;
 extern MatrixXd y_coeff_eg_;
 extern VectorXd y_weights_eg_;
 
+extern std::mutex expression_eg_lock_;
+extern std::condition_variable  new_expression_eg_;
 extern ml::MeshDatad mesh_;
+extern std::vector<unsigned short> mesh_indices_;
 extern MatrixXd neutral_eg_;
-extern MatrixXd expression_eg_;
+extern MatrixXd expression_eg_;	
 extern MatrixXd normal_eg_;
 
 // track
 extern SparseMatrix<double> A_track_eg_;
 extern MatrixXd C_track_eg_;
 
-// refine
-//extern DemRefineMiddleWare middleware_;
-//extern DemRefine dem_refine_;
-
 extern int frame_count_;
-extern cv::Mat dframe_;
-extern cv::Mat cframe_;
+extern int frame_ptr_;
+extern std::vector<cv::Mat> dframes_;
+extern std::vector<cv::Mat> cframes_;
+//extern cv::Mat dframe_;
+//extern cv::Mat cframe_;
 extern DepthCameraIntrinsic depth_camera_;
 extern RgbCameraIntrinsic rgb_camera_;
 extern Matrix<double, 3, 3> depth_camera_project_;
@@ -80,12 +82,6 @@ extern DlibLandmarkDetector landmark_detector_;
 extern ImageReaderKinect image_reader;
 
 void DEM();
-
-//bool SVD();
-void SolvePnP();
-//void UpdateMotion(cv::Mat &dframe, std::vector<Eigen::Vector2d> pts, MatrixXd expression_eg, int xmin, int xmax, int ymin, int ymax);
-void FitMotion();
-//bool UpdateFrame(bool force_motion);
 
 Vector3d ReprojectionDepth(Vector2d p2, int depth);
 Vector3d ReprojectionRgb(Vector2d p2, int depth);

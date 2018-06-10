@@ -2,6 +2,9 @@
 
 #include <chrono>
 
+bool dem_running;
+bool dem_init_done;
+
 long long track_time_;
 long long track_time1_;
 long long track_time2_;
@@ -17,10 +20,7 @@ MatrixXd delta_B1_eg_;
 MatrixXd delta_B2_eg_;
 MatrixXd delta_B_eg_;
 
-int motion_param_ptr;
-bool motion_param_updated;
-double motion_param[motion_param_size][6];
-double motion_param_tmp[6];
+double motion_param[frame_size][6];
 Vector3d translation_eg_;
 Matrix<double, 3, 3> rotation_eg_;
 cv::Mat translation_cv_;
@@ -31,7 +31,10 @@ MatrixXd xx_coeff_eg_, xxx_coeff_eg_;
 MatrixXd y_coeff_eg_;
 VectorXd y_weights_eg_;
 
+std::mutex expression_eg_lock_;
+std::condition_variable  new_expression_eg_;
 ml::MeshDatad mesh_;
+std::vector<unsigned short> mesh_indices_;
 MatrixXd neutral_eg_;
 MatrixXd expression_eg_;
 MatrixXd normal_eg_;
@@ -45,8 +48,11 @@ MatrixXd C_track_eg_;
 //DemRefine dem_refine_;
 
 int frame_count_;
-cv::Mat dframe_;
-cv::Mat cframe_;
+int frame_ptr_;
+std::vector<cv::Mat> dframes_;
+std::vector<cv::Mat> cframes_;
+//cv::Mat dframe_;
+//cv::Mat cframe_;
 DepthCameraIntrinsic depth_camera_;
 RgbCameraIntrinsic rgb_camera_;
 Matrix<double, 3, 3> depth_camera_project_;
@@ -61,6 +67,10 @@ ImageReaderKinect image_reader;
 
 void DEM()
 {
+	//
+	dem_running = false;
+	dem_init_done = false;
+	//
 	track_time_ = 0;
 	track_time1_ = 0;
 	track_time2_ = 0;
@@ -68,6 +78,14 @@ void DEM()
 	solve_time1_ = 0;
 	solve_time2_ = 0;
 	solve_time3_ = 0;
+	//
+	frame_ptr_ = 0;
+#if USE_KINECT
+	TODO
+#else
+	dframes_.resize(frame_size, cv::Mat(dframe_height, dframe_width, CV_8UC3));
+	cframes_.resize(frame_size, cv::Mat(cframe_height, cframe_width, CV_32FC3));
+#endif
 	//
 	depth_camera_project_ <<
 		-1 * depth_camera_.fx, 0, depth_camera_.cx,
@@ -95,12 +113,9 @@ void DEM()
 	translation_cv_ = cv::Mat(3, 1, CV_64FC1);
 	rotation_eg_.setZero();
 	translation_eg_ = Vector3d(0, 0, 500);
-	motion_param_updated = 0;
-	motion_param_ptr = 1;
-	for (int i = 0; i < motion_param_size; i++) {
+	for (int i = 0; i < frame_size; i++) {
 		Eigen2Ceres(rotation_eg_, translation_eg_, motion_param[i]);
 	}
-	Eigen2Ceres(rotation_eg_, translation_eg_, motion_param_tmp);
 	//
 	x_coeff_eg_.resize(exp_size, 1);
 	x_coeff_eg_.setZero();
@@ -118,7 +133,14 @@ void DEM()
 	for (int i = 0; i < face_landmark.size(); i++) {
 		mesh_.m_Colors[face_landmark[i]] = ml::vec4d(1.0, 0.0, 0.0, 1.0);
 	}
-	ml::MeshIOd::saveToOBJ(Desktop_Path + "landmark.obj", mesh_);
+	mesh_indices_.resize(3 * mesh_.m_FaceIndicesVertices.size());
+	for (int i = 0; i < face_size; i++) {
+		auto& face = mesh_.m_FaceIndicesVertices[i];
+		for (int j = 0; j < 3; j++) {
+			mesh_indices_[i * 3 + j] = face[j];
+		}
+	}
+	//ml::MeshIOd::saveToOBJ(Desktop_Path + "landmark.obj", mesh_);
 	//
 	neutral_eg_.resize(3 * vertex_size, 1);
 	expression_eg_.resize(3 * vertex_size, 1);
@@ -140,49 +162,6 @@ void DEM()
 	image_reader.GetFrames();
 }
 
-void FitMotion()
-{
-	//LOG(INFO) << "fit motion";
-
-	ceres::Problem problem1;
-	ceres::Solver::Options options1;
-	options1.linear_solver_type = ceres::DENSE_NORMAL_CHOLESKY;
-	options1.minimizer_progress_to_stdout = false;
-	options1.max_num_iterations = 500;
-	options1.num_threads = 16;
-	//ceres::LossFunctionWrapper* loss_function_wrapper1 = new ceres::LossFunctionWrapper(new ceres::HuberLoss(1.0), ceres::TAKE_OWNERSHIP);
-
-	int data_size = 5;
-	double coeffs[3 * 6];
-	for (int i = 0; i < data_size; i++) {
-		int prev_ptr = (motion_param_ptr + motion_param_size + i - data_size) % motion_param_size;
-		for (int j = 0; j < 6; j++) {
-			problem1.AddResidualBlock(CeresMotionFitError::Create(i, motion_param[prev_ptr][j]),
-				0,
-				&(coeffs[3 * j])
-			);
-		}
-	}
-	//LOG(INFO) << "start solve";
-	ceres::Solver::Summary summary1;
-	ceres::Solve(options1, &problem1, &summary1);
-	for (int i = 0; i < 6; i++) {
-		motion_param[motion_param_ptr][i] = coeffs[3 * i] + coeffs[3 * i + 1] * data_size + coeffs[3 * i + 2] * data_size * data_size;
-	}
-
-	Ceres2Eigen(rotation_eg_, translation_eg_, motion_param[motion_param_ptr]);
-	//LOG(INFO) << "translation: " << Map<RowVectorXd>(translation_eg_.data(), 3);
-	////std::cout << "translation: " << Map<RowVectorXd>(translation_eg_.data(), 3) << "@fit\n";
-	for (int i = 0; i < 6; i++) {
-		//std::cout << motion_param[motion_param_ptr][i] << " ";
-	}
-	//std::cout << "@fit\n";
-	for (int i = 0; i < 3; i++) {
-		//std::cout << coeffs[i] << " ";
-	}
-	//std::cout << "@fit\n";
-}
-
 void Initialize()
 {
 	ceres::Problem problem1;
@@ -195,23 +174,23 @@ void Initialize()
 	for (int i = 17; i <= 67; i++) {
 		problem1.AddResidualBlock(
 			CeresLandmarkError::Create(face_landmark[i],
-				dframe_,
+				dframes_[frame_ptr_],
 				M_eg_, P_eg_,
 				landmark_detector_.pts_[i]),
 			loss_function_wrapper1, 
-			motion_param[motion_param_ptr], motion_param[motion_param_ptr] + 3, y_coeff_eg_.data()
+			motion_param[frame_ptr_], motion_param[frame_ptr_] + 3, y_coeff_eg_.data()
 		);
 	}
 	for (int i = 0; i < vertex_size; i += 25) {
 		problem1.AddResidualBlock(
 			CeresFaceDenseError::Create(i,
-				dframe_,
+				dframes_[frame_ptr_],
 				M_eg_, P_eg_,
 				normal_eg_,
 				0.075,
 				true),
 			loss_function_wrapper1,
-			motion_param[motion_param_ptr], motion_param[motion_param_ptr] + 3, y_coeff_eg_.data()
+			motion_param[frame_ptr_], motion_param[frame_ptr_] + 3, y_coeff_eg_.data()
 		);
 	}
 	problem1.AddResidualBlock(
@@ -221,7 +200,7 @@ void Initialize()
 	ceres::Solver::Summary summary1;
 	ceres::Solve(options1, &problem1, &summary1);
 
-	Ceres2Eigen(rotation_eg_, translation_eg_, motion_param[motion_param_ptr]);
+	Ceres2Eigen(rotation_eg_, translation_eg_, motion_param[frame_ptr_]);
 	//LOG(INFO) << "translation: " << Map<RowVectorXd>(translation_eg_.data(), 3);
 	//LOG(INFO) << "Y: " << Map<RowVectorXd>(y_coeff_eg_.data(), pca_size);
 	//std::cout << "translation: " << Map<RowVectorXd>(translation_eg_.data(), 3) << "\n";
@@ -311,11 +290,11 @@ void TrackCeres()
 	for (int i = 36; i <= 47; i++) {
 		int index = face_landmark[i];
 		problem1.AddResidualBlock(
-			CeresTrackLandmarkError::Create(dframe_,
+			CeresTrackLandmarkError::Create(dframes_[frame_ptr_],
 				landmark_detector_.pts_[i],
 				neutral_eg_.block(3 * index, 0, 3, 1),
 				delta_B_eg_.block(3 * index, 0, 3, exp_size),
-				motion_param[motion_param_ptr]),
+				motion_param[frame_ptr_]),
 			0,
 			x_coeff_eg_.data()
 		);
@@ -323,11 +302,11 @@ void TrackCeres()
 	for (int i = 48; i <= 67; i++) {
 		int index = face_landmark[i];
 		problem1.AddResidualBlock(
-			CeresTrackLandmarkError::Create(dframe_,
+			CeresTrackLandmarkError::Create(dframes_[frame_ptr_],
 				landmark_detector_.pts_[i],
 				neutral_eg_.block(3 * index, 0, 3, 1),
 				delta_B_eg_.block(3 * index, 0, 3, exp_size),
-				motion_param[motion_param_ptr]),
+				motion_param[frame_ptr_]),
 			0,
 			x_coeff_eg_.data()
 		);
@@ -373,8 +352,12 @@ void UpdateDeltaBlendshapeCPU()
 void UpdateExpressionFaceCPU()
 {
 	//LOG(INFO) << "expression cpu";
-	expression_eg_ = neutral_eg_;
-	expression_eg_.noalias() += delta_B_eg_ * x_coeff_eg_;
+	{
+		std::lock_guard<std::mutex> lock(expression_eg_lock_);
+		expression_eg_ = neutral_eg_;
+		expression_eg_.noalias() += delta_B_eg_ * x_coeff_eg_;
+	}
+	new_expression_eg_.notify_one();
 }
 
 void UpdateNormalCPU()
@@ -436,10 +419,10 @@ void WritePointCloud()
 {
 	ml::MeshDatad tmp;
 
-	tmp.m_Vertices.resize(dframe_.rows * dframe_.cols, ml::vec3d(0, 0, 1000));
-	for (int i = 0; i < dframe_.rows; i++) {
+	tmp.m_Vertices.resize(dframe_width * dframe_height, ml::vec3d(0, 0, 1000));
+	for (int i = 0; i < dframe_height; i++) {
 #pragma omp parallel for
-		for (int j = 0; j < dframe_.cols; j++) {
+		for (int j = 0; j < dframe_width; j++) {
 #if USE_KINECT
 			int depth = dframe_.at<unsigned short>(i, j);
 			if (depth > 2000)
@@ -447,10 +430,10 @@ void WritePointCloud()
 			Vector3d p3 = ReprojectionDepth(Vector2d(j, i), depth);
 			tmp.m_Vertices[i * dframe_.cols + j] = ml::vec3d(p3.data());
 #else
-			cv::Vec3f p3 = dframe_.at<cv::Vec3f>(i, j) * 1e3f;
+			cv::Vec3f p3 = dframes_[frame_ptr_].at<cv::Vec3f>(i, j) * 1e3f;
 			if (p3[2] > 1000)
 				continue;
-			tmp.m_Vertices[i * dframe_.cols + j] = ml::vec3d(-1 * p3[0], -1 * p3[1], p3[2]);
+			tmp.m_Vertices[i * dframe_width + j] = ml::vec3d(-1 * p3[0], -1 * p3[1], p3[2]);
 #endif
 		}
 	}
@@ -492,51 +475,6 @@ Vector3d ProjectionRgb(Vector3d p3)
 	return 1.0 / p3.z() * rgb_camera_project_ * p3;
 }
 
-void SolvePnP()
-{
-	std::vector<cv::Point3d> pts3;
-	std::vector<cv::Point2d> pts2;
-	for (int i = 0; i < face_landmark_size; i++) {
-		if (i < 17 || i >= 60 || (i >= 27 && i <= 30))
-			continue;
-		Vector3d pt3 = expression_eg_.block(3 * face_landmark[i], 0, 3, 1);
-		pts3.push_back(cv::Point3d(pt3(0), pt3(1), pt3(2)));
-		pts2.push_back(cv::Point2d(landmark_detector_.pts_[i](0), landmark_detector_.pts_[i](1)));
-	}
-	static double K[9] = {
-		-1 * depth_camera_.fx, 0, depth_camera_.cx,
-		0, -1 * depth_camera_.fy, depth_camera_.cy,
-		0, 0, 1
-	};
-	static double D[5] = {
-		0, 0, 0, 0, 0
-	};
-	static cv::Mat cam_matrix = cv::Mat(3, 3, CV_64FC1, K);
-	static cv::Mat dist_coeffs = cv::Mat(5, 1, CV_64FC1, D);
-
-	cv::Mat inlier;
-	//cv::solvePnPRansac(pts3, pts2, cam_matrix, dist_coeffs, rotation_cv_, translation_cv_,
-	//true, 100, 4.0, 0.95, inlier);
-	cv::solvePnP(pts3, pts2, cam_matrix, dist_coeffs, rotation_cv_, translation_cv_);
-	//for (int i = 0; i < inlier.rows; i++) {
-	//	//std::cout << inlier.at<int>(i, 0) << " ";
-	//}
-	////std::cout << "\n";
-	//LOG(INFO) << "inlier size" << inlier.size();
-
-	cv::Mat rotation_mat = cv::Mat(3, 3, CV_64FC1);
-	cv::Rodrigues(rotation_cv_, rotation_mat);
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			rotation_eg_(i, j) = rotation_mat.at<double>(i, j);
-		}
-		translation_eg_(i) = translation_cv_.at<double>(i, 0);
-	}
-	////LOG(INFO) << "rotation:" << rotation_eg_;
-	//LOG(INFO) << "translation:" << Map<RowVectorXd>(translation_eg_.data(), 3);
-	//std::cout << "translation:" << Map<RowVectorXd>(translation_eg_.data(), 3) << "\n";
-}
-
 void Track()
 {
 	//LOG(INFO) << "track start";
@@ -556,10 +494,10 @@ void Track()
 	// output
 	std::chrono::steady_clock::time_point tp3 = std::chrono::steady_clock::now();
 	UpdateExpressionFaceCPU();
-	std::thread t(WriteExpressionFace, frame_count_, expression_eg_, translation_eg_, rotation_eg_);
-	t.detach();
-	//
 	//UpdateNormalCPU();
+	//std::thread t(WriteExpressionFace, frame_count_, expression_eg_, translation_eg_, rotation_eg_);
+	//t.detach();
+	//
 	std::chrono::steady_clock::time_point tp4 = std::chrono::steady_clock::now();
 	track_time1_ += std::chrono::duration_cast<std::chrono::milliseconds>(tp2 - tp1).count();
 	track_time2_ += std::chrono::duration_cast<std::chrono::milliseconds>(tp3 - tp2).count();
@@ -624,10 +562,7 @@ void EyeMouthTrack()
 		//
 		MatrixXd res = X * Beta_result - Y;
 		double new_cost = res.squaredNorm();
-		printf("%f + %f = %f@eye\n",
-			res.topRows(total_residual_size).squaredNorm(),
-			res.bottomRows(exp_size).squaredNorm(),
-			new_cost);
+		//printf("%f + %f = %f@eye\n", res.topRows(total_residual_size).squaredNorm(), res.bottomRows(exp_size).squaredNorm(), new_cost);
 		if ((cost - new_cost) > 1 || cost < 0) {
 			cost = new_cost;
 			Beta = Beta_result;
@@ -645,10 +580,10 @@ void EyeMouthTrack()
 
 void EyeTrack()
 {
-	//const static double lambda1 = 15.0;
-	//const static double lambda2 = 25.0;
-	const static double lambda1 = 250.0;
-	const static double lambda2 = 500.0;
+	const static double lambda1 = 15.0;
+	const static double lambda2 = 50.0;
+	//const static double lambda1 = 250.0;
+	//const static double lambda2 = 500.0;
 	// X
 	MatrixXd X(2 * eye_landmark_size + eye_exp_size, eye_exp_size);
 	X.setZero();
@@ -702,10 +637,7 @@ void EyeTrack()
 		double cost1 = res.topRows(2 * eye_landmark_size).squaredNorm();
 		double cost2 = res.bottomRows(eye_exp_size).squaredNorm();
 		double new_cost = cost1 + cost2;
-		printf("%f + %f = %f@eye\n",
-			cost1,
-			cost2,
-			new_cost);
+		//printf("%f + %f = %f@eye\n", cost1, cost2, new_cost);
 		if ((cost - new_cost) > 1 || cost < 0) {
 			cost = new_cost;
 			Beta = Beta_result;
@@ -723,7 +655,7 @@ void EyeTrack()
 
 void MouthTrack()
 {
-	const static double lambda1 = 250.0;
+	const static double lambda1 = 150.0;
 	const static double lambda2 = 500.0;
 	// X
 	MatrixXd X(2 * mouth_landmark_size + mouth_exp_size, mouth_exp_size);
@@ -778,10 +710,7 @@ void MouthTrack()
 		double cost1 = res.topRows(2 * eye_landmark_size).squaredNorm();
 		double cost2 = res.bottomRows(eye_exp_size).squaredNorm();
 		double new_cost = cost1 + cost2;
-		printf("%f + %f = %f@mouth\n",
-			cost1,
-			cost2,
-			new_cost);
+		//printf("%f + %f = %f@mouth\n", cost1, cost2, new_cost);
 		if ((cost - new_cost) > 0.1 || cost < 0) {
 			cost = new_cost;
 			Beta = Beta_result;

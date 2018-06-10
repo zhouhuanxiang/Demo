@@ -44,6 +44,7 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
+#include <QGLFormat>
 
 #include <string>
 #include <Eigen/Eigen>
@@ -55,7 +56,8 @@ public:
     virtual ~GeometryEngine();
 
 	void drawFaceGeometry(QOpenGLShaderProgram *program);
-	void updateFaceGeometry(Eigen::VectorXf &pos, Eigen::VectorXf &nor, Eigen::VectorXf &ind);
+	void updateFaceGeometry(Eigen::MatrixXd &pos);
+	void setConstant();
 private:
 	QOpenGLBuffer arrayBuf;
 	QOpenGLBuffer positionBuf;
@@ -63,6 +65,8 @@ private:
     QOpenGLBuffer indexBuf;
 
 	bool rendered;
+	Eigen::VectorXf local_pos_;
+	Eigen::VectorXf local_nor_;
 };
 
 #endif // GEOMETRYENGINE_H

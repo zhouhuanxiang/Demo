@@ -87,6 +87,9 @@
     <ClCompile Include="parameters.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="threadmanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mlibutil\mlibutil.h">
@@ -107,9 +110,6 @@
     <ClInclude Include="ceres\ceres_track.h">
       <Filter>ceres</Filter>
     </ClInclude>
-    <ClInclude Include="dlib\dlib_face_detector.h">
-      <Filter>dlib</Filter>
-    </ClInclude>
     <ClInclude Include="reader\image_reader.h">
       <Filter>reader</Filter>
     </ClInclude>
@@ -129,6 +129,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="parameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dlib\dlib_landmark_detector.h">
+      <Filter>dlib</Filter>
+    </ClInclude>
+    <ClInclude Include="threadmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

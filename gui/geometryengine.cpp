@@ -38,15 +38,13 @@
 **
 ****************************************************************************/
 
+#include "../parameters.h"
+#include "../dem.h"
 #include "mlibutil/mlibutil.h"
 #include "geometryengine.h"
 
 #include <QVector2D>
 #include <QVector3D>
-
-
-#define VERTEX_SIZE 3223
-#define FACE_SIZE 6226
 
 struct VertexData
 {
@@ -65,6 +63,9 @@ GeometryEngine::GeometryEngine()
 	normalBuf.create();
 	indexBuf.create();
 
+	local_pos_.resize(3 * vertex_size);
+	local_nor_.resize(3 * vertex_size);
+
 	// Initializes cube geometry and transfers it to VBOs
 	//updateFaceGeometry();
 }
@@ -78,28 +79,63 @@ GeometryEngine::~GeometryEngine()
 }
 //! [0]
 
-void GeometryEngine::updateFaceGeometry(Eigen::VectorXf &pos, Eigen::VectorXf &nor, Eigen::VectorXf &ind)
+void GeometryEngine::setConstant()
 {
-	GLushort indices[FACE_SIZE * 3];
-	for (int i = 0; i < FACE_SIZE; i++) {
-		//auto& face = mesh.m_FaceIndicesVertices[i];
-		indices[i * 3 + 0] = ind[3 * i + 0];
-		indices[i * 3 + 1] = ind[3 * i + 1];
-		indices[i * 3 + 2] = ind[3 * i + 2];
+	indexBuf.bind();
+	indexBuf.allocate(mesh_indices_.data(), face_size * 3 * sizeof(GLushort));
+
+	mesh_.computeVertexNormals();
+	std::cout << mesh_.m_Normals.size() << "\n";
+	for (int i = 0; i < vertex_size; i++) {
+		for (int j = 0; j < 3; j++) {
+			local_nor_(3 * i + j) = -1 * mesh_.m_Normals[i][j];
+		}
 	}
+	normalBuf.bind();
+	normalBuf.allocate(local_nor_.data(), vertex_size * 3 * sizeof(float));
+}
+
+void GeometryEngine::updateFaceGeometry(Eigen::MatrixXd &pos)
+{
+	for (int i = 0; i < 3 * vertex_size; i++) {
+		local_pos_(i) = pos(i, 0);
+	}
+
+//	Eigen::Map<VectorXf> nor_map(local_nor_.data(), 3, vertex_size);
+//	Eigen::Map<VectorXf> exp_map(local_pos_.data(), 3, vertex_size);
+//	nor_map.setZero();
+//#pragma omp parallel for
+//	for (int f = 0; f < (int)mesh_.m_FaceIndicesVertices.size(); f++) {
+//		ml::MeshDatad::Indices::Face &ind = mesh_.m_FaceIndicesVertices[f];
+//		Vector3f vec1 = exp_map.col(ind[1]) - exp_map.col(ind[0]);
+//		Vector3f vec2 = exp_map.col(ind[2]) - exp_map.col(ind[0]);
+//		Vector3f n = vec2.cross(vec1).normalized();
+//		nor_map.col(ind[0]) += n;
+//		nor_map.col(ind[1]) += n;
+//		nor_map.col(ind[2]) += n;
+//	}
+	//for (int i = 0; i < vertex_size; i++) {
+	//	local_nor_(i * 3 + 0) = 0;
+	//	local_nor_(i * 3 + 1) = 0;
+	//	local_nor_(i * 3 + 2) = 1;
+	//}
 
 	//! [1]
 	// Transfer vertex data to VBO 0
 	//arrayBuf.bind();
-	//arrayBuf.allocate(vertices, VERTEX_SIZE * 6 * sizeof(float));
+	//arrayBuf.allocate(vertices, vertex_size * 6 * sizeof(float));
 	positionBuf.bind();
-	arrayBuf.allocate(pos.data(), VERTEX_SIZE * 3 * sizeof(float));
-	normalBuf.bind();
-	arrayBuf.allocate(nor.data(), VERTEX_SIZE * 3 * sizeof(float));
+	positionBuf.allocate(local_pos_.data(), vertex_size * 3 * sizeof(float));
+	//normalBuf.bind();
+	//normalBuf.allocate(local_nor_.data(), vertex_size * 3 * sizeof(float));
 
 	// Transfer index data to VBO 1
-	indexBuf.bind();
-	indexBuf.allocate(indices, FACE_SIZE * 3 * sizeof(GLushort));
+	//static bool first = true;
+	//if (first) {
+	//	first = false;
+	//	indexBuf.bind();
+	//	indexBuf.allocate(mesh_indices_.data(), face_size * 3 * sizeof(GLushort));
+	//}
 	//! [1]
 }
 
@@ -118,5 +154,5 @@ void GeometryEngine::drawFaceGeometry(QOpenGLShaderProgram *program)
 
 	// Draw cube geometry using indices from VBO 1
 	indexBuf.bind();
-	glDrawElements(GL_TRIANGLES, FACE_SIZE * 3 * sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, face_size * 3 * sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
 }

@@ -1,4 +1,7 @@
 #pragma once
+
+#include "../threadmanager.h"
+
 #include <QMainWindow>
 #include <QLabel>
 #include <QScrollArea>
@@ -10,8 +13,10 @@
 #include <QWidget>
 #include <QTimer>
 #include <QPushButton>
+#include <QtConcurrent/QtConcurrent>
 
 #include "mainwidget.h"
+#include <opencv2/imgproc/imgproc.hpp>
 
 class QWidget;
 class QAction;
@@ -30,37 +35,36 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	MainWindow();
+	MainWindow(ThreadManager *tmanager);
 
 	QWidget *centralWidget;
 	QScrollArea *glWidgetArea;
-	QScrollArea *pixmapLabelArea;
+	//QScrollArea *pixmapLabelArea;
 	MainWidget *glWidget;
-	QLabel *pixmapLabel;
-	QLabel *debugLabel;
-	
-	QPushButton *startButton;
-	QPushButton *stopButton;
-	QPushButton *nextButton;
-	QPushButton *prevButton;
-	QPushButton *next10Button;
-	QPushButton *prev10Button;
+	//QLabel *pixmapLabel;
+	//QLabel *debugLabel;
 
-	QTimer *timer;
-	int timerId;
-	int count;
+	QTimer *timer1;
+	QTimer *timer2;
+	int count1;
+	int count2;
+
+signals:
 
 	public slots:
-	void button_start();
-	void button_stop();
-	void button_next();
-	void button_prev();
-	void button_next10();
-	void button_prev10();
-
-	void UpdateAll();
+	//
 	void UpdateFace();
 	void UpdateImage();
+	//
+	void UpdateFace1();
+	void UpdateImage1();
+	void UpdateAll1();
+	//
+	void StartTimer();
+	void StopTimer();
+
 protected:
-	void timerEvent(QTimerEvent *event);
+
+private:
+	ThreadManager *tmanager;
 };
