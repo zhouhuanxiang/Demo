@@ -13,6 +13,8 @@ class ThreadManager
 public:
 	ThreadManager();
 
+	void DemInitThread();
+
 	void DemThread();
 
 	void ImageThread();
@@ -25,6 +27,8 @@ public:
 	std::condition_variable local_new_expression_;
 	int local_expression_count_;
 	Eigen::MatrixXd local_expression_;
+
+	int base;
 };
 
 #endif // !THREAD_MANAGER_H_

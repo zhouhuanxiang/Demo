@@ -6,24 +6,67 @@ ThreadManager::ThreadManager()
 {
 	DEM();
 
-	std::thread t1(&ThreadManager::DemThread, this);
+	base = 25;
+
+	std::thread t1(&ThreadManager::DemInitThread, this);
 	t1.detach();
 
 	std::thread t2(&ThreadManager::ExpressionThread, this);
 	t2.detach();
 }
 
-void ThreadManager::DemThread()
+void ThreadManager::DemInitThread()
 {
-	int base = 25;
-	for (frame_count_ = base; frame_count_ <= base + 5; frame_count_++) {
+#if REAL_MODE
+	for (int i = 0; i < 5;) {
+		if (!dem_running) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			continue;
+		}
+		bool result = UpdateFrame(true);
+		if (!result) {
+			std::cout << "wrong";
+			base++;
+			continue;
+		}
+	}
+#else
+	for (frame_count_ = base; frame_count_ <= base + 5;) {
+		if (!dem_running) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			continue;
+		}
+		frame_count_++;
 		//LOG(INFO) << "\n\nframe No." << frame_count_;
 		//std::cout << "# " << frame_count_ << "\n";
-		UpdateFrame(true);
+		bool result = UpdateFrame(true);
+		if (!result) {
+			std::cout << "wrong";
+			base++;
+			continue;
+		}
 		Initialize();
 	}
+#endif
 	UpdateNormalCPU();
 	dem_init_done = true;
+
+	cv::destroyAllWindows();
+
+	std::thread t1(&ThreadManager::DemThread, this);
+	t1.detach();
+}
+
+void ThreadManager::DemThread()
+{
+	//for (frame_count_ = base; frame_count_ <= base + 5; frame_count_++) {
+	//	//LOG(INFO) << "\n\nframe No." << frame_count_;
+	//	//std::cout << "# " << frame_count_ << "\n";
+	//	UpdateFrame(true);
+	//	Initialize();
+	//}
+	//UpdateNormalCPU();
+	//dem_init_done = true;
 
 	std::chrono::steady_clock::time_point total_start = std::chrono::steady_clock::now();
 	long long t1, t2;
@@ -33,11 +76,10 @@ void ThreadManager::DemThread()
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			continue;
 		}
-
-		//LOG(INFO) << "\n\nframe No." << frame_count_;
 		std::cout << "# " << frame_count_ << "\n";
 		std::chrono::steady_clock::time_point tp1 = std::chrono::steady_clock::now();
-		UpdateFrame(true);
+		if (!UpdateFrame(true))
+			continue;
 		std::chrono::steady_clock::time_point tp2 = std::chrono::steady_clock::now();
 		Track();
 		//TrackCeres();

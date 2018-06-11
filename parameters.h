@@ -3,6 +3,7 @@
 
 #define USE_KINECT 0
 #define USE_LAPTOP 0
+#define REAL_MODE 0
 
 #include <set>
 #include <vector>
@@ -74,6 +75,7 @@ extern std::vector<int> useless_expression;
 extern std::vector<int> eye_expression;
 extern std::vector<int> mouth_expression;
 
+const int raw_frame_size = 30;
 const int frame_size = 10;
 
 #if USE_KINECT

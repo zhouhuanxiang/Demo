@@ -25,7 +25,8 @@ class DlibLandmarkDetector
 {
 public:
 	DlibLandmarkDetector()
-		:lcount_(-1), fcount_(-1)
+		:lcount_(-1), fcount_(-1),
+		valid_face(true)
 	{
 		deserialize("../shape_predictor_68_face_landmarks.dat") >> shape_predictor_;
 		pts_.resize(shape_predictor_.num_parts());
@@ -95,9 +96,10 @@ public:
 				// update face (with mtx)
 				UpdateFace(faces[0]);
 				fcount_ = lcount;
+				valid_face = true;
 			}
 			else {
-				//std::cout << "totally " << faces.size() << " faces detected!\n";
+				valid_face = false;
 			}
 		}
 	}
@@ -113,6 +115,11 @@ public:
 
 		while (fcount_ == -1 || lcount_ - fcount_ > 10) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
+
+		if (!valid_face) {
+			std::cout << "wrong";
+			return false;
 		}
 
 		//LOG(INFO) << "landmark detect " << lcount_ - fcount_;
@@ -197,6 +204,8 @@ private:
 
 	std::thread face_thread_;
 	frontal_face_detector face_detector_;
+
+	bool valid_face;
 };
 
 #endif

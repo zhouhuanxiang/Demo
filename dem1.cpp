@@ -99,7 +99,11 @@ bool UpdateFrame(bool force_motion)
 	//static ImageReaderKinect image_reader(Kinect_Data_Dir);
 	image_reader.GetFrame(frame_count_, cframes_[frame_ptr_], dframes_[frame_ptr_]);
 	//return true;
-	landmark_detector_.Detect(cframes_[frame_ptr_], frame_count_, false);
+	bool result = landmark_detector_.Detect(cframes_[frame_ptr_], frame_count_, false);
+	if (!result) {
+		std::cout << "wrong";
+		return false;
+	}
 	//return true;
 
 	UpdateMotion(dframes_[frame_ptr_],

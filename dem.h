@@ -66,6 +66,12 @@ extern MatrixXf normal_eg_f_;
 extern SparseMatrix<double> A_track_eg_;
 extern MatrixXd C_track_eg_;
 
+//raw data
+extern int raw_frame_count_;
+extern int raw_frame_ptr_;
+extern std::vector<cv::Mat> raw_dframes_;
+extern std::vector<cv::Mat> raw_cframes_;
+
 extern int frame_count_;
 extern int frame_ptr_;
 extern std::vector<cv::Mat> dframes_;

@@ -44,9 +44,11 @@ MatrixXf normal_eg_f_;
 SparseMatrix<double> A_track_eg_;
 MatrixXd C_track_eg_;
 
-// refine
-//DemRefineMiddleWare middleware_;
-//DemRefine dem_refine_;
+// raw data
+int raw_frame_count_;
+int raw_frame_ptr_;
+std::vector<cv::Mat> raw_dframes_;
+std::vector<cv::Mat> raw_cframes_;
 
 int frame_count_;
 int frame_ptr_;
@@ -84,6 +86,11 @@ void DEM()
 #if USE_KINECT
 	TODO
 #else
+	raw_frame_ptr_ = 0;
+	raw_frame_count_ = 0;
+	raw_dframes_.resize(raw_frame_size, cv::Mat(dframe_height, dframe_width, CV_8UC3));
+	raw_cframes_.resize(raw_frame_size, cv::Mat(cframe_height, cframe_width, CV_32FC3));
+	//
 	dframes_.resize(frame_size, cv::Mat(dframe_height, dframe_width, CV_8UC3));
 	cframes_.resize(frame_size, cv::Mat(cframe_height, cframe_width, CV_32FC3));
 #endif
@@ -206,7 +213,7 @@ void Initialize()
 	//LOG(INFO) << "translation: " << Map<RowVectorXd>(translation_eg_.data(), 3);
 	//LOG(INFO) << "Y: " << Map<RowVectorXd>(y_coeff_eg_.data(), pca_size);
 	//std::cout << "translation: " << Map<RowVectorXd>(translation_eg_.data(), 3) << "\n";
-	////std::cout << "Y1: " << Map<RowVectorXd>(y_coeff_eg_.data(), exp_size);
+	//std::cout << "Y1: " << Map<RowVectorXd>(y_coeff_eg_.data(), 20);
 
 	//for (int i = 17; i <= 67; i++) {
 	//	CeresLandmarkError error = CeresLandmarkError(face_landmark[i],
@@ -222,7 +229,7 @@ void Initialize()
 	UpdateDeltaBlendshapeCPU();
 	UpdateExpressionFaceCPU();
 	//WriteExpressionFace(frame_count_, expression_eg_, translation_eg_, rotation_eg_);
-	//UpdateNormalCPU();
+	UpdateNormalCPU();
 }
 
 void GenerateIcpMatrix()
@@ -359,7 +366,7 @@ void UpdateExpressionFaceCPU()
 		expression_eg_ = neutral_eg_;
 		expression_eg_.noalias() += delta_B_eg_ * x_coeff_eg_;
 	}
-	new_expression_eg_.notify_one();
+	new_expression_eg_.notify_all();
 }
 
 void UpdateNormalCPU()
