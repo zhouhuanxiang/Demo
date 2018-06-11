@@ -13,6 +13,7 @@
 #include <QWidget>
 #include <QTimer>
 #include <QPushButton>
+#include <QBasicTimer>
 #include <QtConcurrent/QtConcurrent>
 
 #include "mainwidget.h"

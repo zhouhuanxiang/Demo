@@ -154,9 +154,10 @@ void MainWidget::updateFaceGeometry(Eigen::MatrixXd &pos, QVector3D &trans, QQua
 {
 	// Calculate model view transformation
 	model.setToIdentity();
+	//model.translate(QVector3D(0, 0, 500));
 	model.translate(trans);
-	model.rotate(Quat);
-	model.rotate(10, QVector3D(0, 1, 0));
+	//model.rotate(Quat);
+	//model.rotate(10, QVector3D(0, 1, 0));
 
 	//static bool first = true;
 	//if (first) {

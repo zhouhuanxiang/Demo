@@ -22,6 +22,7 @@ void ThreadManager::DemThread()
 		UpdateFrame(true);
 		Initialize();
 	}
+	UpdateNormalCPU();
 	dem_init_done = true;
 
 	std::chrono::steady_clock::time_point total_start = std::chrono::steady_clock::now();
@@ -73,17 +74,19 @@ void ThreadManager::ImageThread()
 void ThreadManager::ExpressionThread()
 {
 	while (true) {
+		//std::this_thread::sleep_for(std::chrono::milliseconds(30));
+
 		Eigen::MatrixXd tmp;
 		std::unique_lock<std::mutex> lock1(expression_eg_lock_);
 		new_expression_eg_.wait(lock1, [this] { return (local_expression_count_ != frame_count_); });
 		tmp = expression_eg_;
 		lock1.unlock();
 
-		{
+		{	
 			std::lock_guard<std::mutex> lock2(local_expression_lock_);
 			local_expression_ = tmp;
 			local_expression_count_ = frame_count_;
 		}
-		local_new_expression_.notify_one();
+		local_new_expression_.notify_all();
 	}
 }

@@ -221,8 +221,8 @@ void Initialize()
 	UpdateNeutralFaceCPU();
 	UpdateDeltaBlendshapeCPU();
 	UpdateExpressionFaceCPU();
-	WriteExpressionFace(frame_count_, expression_eg_, translation_eg_, rotation_eg_);
-	UpdateNormalCPU();
+	//WriteExpressionFace(frame_count_, expression_eg_, translation_eg_, rotation_eg_);
+	//UpdateNormalCPU();
 }
 
 void GenerateIcpMatrix()
