@@ -82,6 +82,8 @@ private:
     QMatrix4x4 projection;
 	QMatrix4x4 view;
 	QMatrix4x4 model;
+
+	Eigen::MatrixXd local_pos_;
 };
 
 #endif // MAINWIDGET_H

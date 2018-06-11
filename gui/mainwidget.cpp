@@ -49,6 +49,8 @@ MainWidget::MainWidget(QWidget *parent) :
     QOpenGLWidget(parent),
     geometries(0)
 {
+	local_pos_.resize(3 * vertex_size, 1);
+	local_pos_.setZero();
 }
 
 MainWidget::~MainWidget()
@@ -134,6 +136,17 @@ void MainWidget::paintGL()
     program.setUniformValue("mvp_matrix", projection * view * model);
 //! [6]
 
+	static bool first = true;
+	if (first) {
+		geometries->setConstant(&program);
+		first = false;
+	}
+	if (dem_init_done) {
+		geometries->setNormal(&program);
+		dem_init_done = false;
+	}
+	geometries->updateFaceGeometry(local_pos_);
+
 	geometries->drawFaceGeometry(&program);
 }
 
@@ -145,15 +158,18 @@ void MainWidget::updateFaceGeometry(Eigen::MatrixXd &pos, QVector3D &trans, QQua
 	model.rotate(Quat);
 	model.rotate(10, QVector3D(0, 1, 0));
 
-	static bool first = true;
-	if (first) {
-		geometries->setConstant(&program);
-		first = false;
-	}
-	if (dem_init_done) {
-		geometries->setNormal(&program);
-		dem_init_done = false;
-	}
-	geometries->updateFaceGeometry(pos);
+	//static bool first = true;
+	//if (first) {
+	//	geometries->setConstant(&program);
+	//	first = false;
+	//}
+	//if (dem_init_done) {
+	//	geometries->setNormal(&program);
+	//	dem_init_done = false;
+	//}
+	//geometries->updateFaceGeometry(pos);
+
+	local_pos_ = pos;
+
 	update();
 }
