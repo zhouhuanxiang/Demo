@@ -79,7 +79,19 @@ GeometryEngine::~GeometryEngine()
 }
 //! [0]
 
-void GeometryEngine::setConstant()
+void GeometryEngine::setNormal(QOpenGLShaderProgram *program)
+{
+	normalBuf.bind();
+	normalBuf.allocate(normal_eg_f_.data(), vertex_size * 3 * sizeof(float));
+	//int normalLocation = program->attributeLocation("a_normal");
+	//program->enableAttributeArray(normalLocation);
+	//normalBuf.bind();
+	//program->setAttributeBuffer(normalLocation, GL_FLOAT, 0, 3, sizeof(float) * 3);
+
+	local_nor_ = normal_eg_f_;
+}
+
+void GeometryEngine::setConstant(QOpenGLShaderProgram *program)
 {
 	indexBuf.bind();
 	indexBuf.allocate(mesh_indices_.data(), face_size * 3 * sizeof(GLushort));
@@ -93,6 +105,10 @@ void GeometryEngine::setConstant()
 	}
 	normalBuf.bind();
 	normalBuf.allocate(local_nor_.data(), vertex_size * 3 * sizeof(float));
+	//int normalLocation = program->attributeLocation("a_normal");
+	//program->enableAttributeArray(normalLocation);
+	//normalBuf.bind();
+	//program->setAttributeBuffer(normalLocation, GL_FLOAT, 0, 3, sizeof(float) * 3);
 }
 
 void GeometryEngine::updateFaceGeometry(Eigen::MatrixXd &pos)

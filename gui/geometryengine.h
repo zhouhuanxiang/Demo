@@ -57,7 +57,8 @@ public:
 
 	void drawFaceGeometry(QOpenGLShaderProgram *program);
 	void updateFaceGeometry(Eigen::MatrixXd &pos);
-	void setConstant();
+	void setNormal(QOpenGLShaderProgram *program);
+	void setConstant(QOpenGLShaderProgram *program);
 private:
 	QOpenGLBuffer arrayBuf;
 	QOpenGLBuffer positionBuf;

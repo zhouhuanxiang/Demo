@@ -38,6 +38,7 @@ std::vector<unsigned short> mesh_indices_;
 MatrixXd neutral_eg_;
 MatrixXd expression_eg_;
 MatrixXd normal_eg_;
+MatrixXf normal_eg_f_;
 
 // track
 SparseMatrix<double> A_track_eg_;
@@ -145,6 +146,7 @@ void DEM()
 	neutral_eg_.resize(3 * vertex_size, 1);
 	expression_eg_.resize(3 * vertex_size, 1);
 	normal_eg_.resize(3, vertex_size);
+	normal_eg_f_.resize(3, vertex_size);
 	//
 	A_track_eg_.resize(total_residual_size, 3 * vertex_size);
 	C_track_eg_.resize(total_residual_size, 1);
@@ -371,8 +373,6 @@ void UpdateNormalCPU()
 		Vector3d vec1 = model_map.col(ind[1]) - model_map.col(ind[0]);
 		Vector3d vec2 = model_map.col(ind[2]) - model_map.col(ind[0]);
 		Vector3d n = vec2.cross(vec1);
-		if (n(2) < 0)
-			n(2) *= -1;
 		normal_eg_.col(ind[0]) += n;
 		normal_eg_.col(ind[1]) += n;
 		normal_eg_.col(ind[2]) += n;
@@ -380,6 +380,10 @@ void UpdateNormalCPU()
 #pragma omp parallel for
 	for (int v = 0; v < vertex_size; v++) {
 		normal_eg_.col(v).normalize();
+	}
+
+	for (int i = 0; i < vertex_size * 3; i++) {
+		*((float*)normal_eg_f_.data() + i) = *((double*)normal_eg_.data() + i);
 	}
 }
 

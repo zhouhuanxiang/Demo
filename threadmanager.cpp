@@ -22,6 +22,7 @@ void ThreadManager::DemThread()
 		UpdateFrame(true);
 		Initialize();
 	}
+	dem_init_done = true;
 
 	std::chrono::steady_clock::time_point total_start = std::chrono::steady_clock::now();
 	long long t1, t2;
@@ -31,7 +32,7 @@ void ThreadManager::DemThread()
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			continue;
 		}
-		dem_init_done = true;
+
 		//LOG(INFO) << "\n\nframe No." << frame_count_;
 		std::cout << "# " << frame_count_ << "\n";
 		std::chrono::steady_clock::time_point tp1 = std::chrono::steady_clock::now();

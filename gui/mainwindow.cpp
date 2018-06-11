@@ -74,7 +74,7 @@ MainWindow::MainWindow(ThreadManager *tmanager)
 
 void MainWindow::StartTimer()
 {
-	timer1->start(40);
+	//timer1->start(40);
 	timer2->start(40);
 	dem_running = true;
 }

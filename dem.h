@@ -60,6 +60,7 @@ extern std::vector<unsigned short> mesh_indices_;
 extern MatrixXd neutral_eg_;
 extern MatrixXd expression_eg_;	
 extern MatrixXd normal_eg_;
+extern MatrixXf normal_eg_f_;
 
 // track
 extern SparseMatrix<double> A_track_eg_;

@@ -58,6 +58,12 @@ public:
 		//LOG(INFO) << "read image (I/O)";
 		cframe = cframes[idx];
 		dframe = dframes[idx];
+
+		cv::Mat tmp;
+		double scale = 0.25;
+		cv::resize(cframe, tmp, cv::Size(), scale, scale);
+		cv::imshow("Color", tmp);
+		const int key = cv::waitKey(1);
 	}
 public:
 	string path;

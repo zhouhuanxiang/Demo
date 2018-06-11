@@ -45,7 +45,7 @@ void UpdateMotion(cv::Mat &dframe, std::vector<Eigen::Vector2d> pts,
 	double *ppprev = motion_param[(frame_ptr_ - 3 + frame_size) % frame_size];
 	for (int i = 0; i < 6; i++) {
 		//p[i] = tmp_motion[i];
-		p[i] = tmp_motion[i] * 0.8 + prev[i] * 0.2;
+		p[i] = tmp_motion[i] * 0.6 + prev[i] * 0.4;
 	}
 
 	//for (int i = 0; i < 6; i++) {

@@ -111,7 +111,7 @@ void MainWidget::resizeGL(int w, int h)
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
     // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 40.0, zFar = 1000.0, fov = 45.0;
+    const qreal zNear = 100.0, zFar = 1000.0, fov = 45.0;
 
     // Reset projection
 	projection.setToIdentity();
@@ -147,8 +147,12 @@ void MainWidget::updateFaceGeometry(Eigen::MatrixXd &pos, QVector3D &trans, QQua
 
 	static bool first = true;
 	if (first) {
+		geometries->setConstant(&program);
 		first = false;
-		geometries->setConstant();
+	}
+	if (dem_init_done) {
+		geometries->setNormal(&program);
+		dem_init_done = false;
 	}
 	geometries->updateFaceGeometry(pos);
 	update();

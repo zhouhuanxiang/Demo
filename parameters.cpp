@@ -13,7 +13,7 @@ using namespace std;
 	#if USE_KINECT
 		string Kinect_Data_Dir	= "F:/Kinect2/new1/";
 	#else
-		string Kinect_Data_Dir = "F:/SunnuMars/zhx3/";
+		string Kinect_Data_Dir = "F:/SunnuMars/zhx2/";
 	#endif
 #endif
 
