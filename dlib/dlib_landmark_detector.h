@@ -89,7 +89,7 @@ public:
 			// Change to dlib's image format. No memory is copied.
 			cv_image<bgr_pixel> cimg(cframe_bgr_local);
 
-			LOG(WARNING) << "face detect No." << lcount_ << " " << lcount_ - fcount_;
+			//LOG(WARNING) << "face detect No." << lcount_ << " " << lcount_ - fcount_;
 
 			std::vector<rectangle> faces = face_detector_(cimg);
 			if (faces.size() == 1) {

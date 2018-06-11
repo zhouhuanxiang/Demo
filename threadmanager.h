@@ -4,6 +4,8 @@
 #include "dem.h"
 #include "dem1.h"
 
+#include "libTof.h"
+
 #include <mutex>
 #include <thread>
 #include <iostream>
@@ -20,6 +22,8 @@ public:
 	void ImageThread();
 
 	void ExpressionThread();
+
+	void CameraThread();
 
 public:
 	int local_cframe_count_;

@@ -70,6 +70,11 @@ MainWindow::MainWindow(ThreadManager *tmanager)
 
 	connect(startButton, SIGNAL(clicked()), this, SLOT(StartTimer()));
 	connect(stopButton, SIGNAL(clicked()), this, SLOT(StopTimer()));
+
+#if REAL_MODE
+	timer2->start(20);
+#else
+#endif
 }
 
 void MainWindow::StartTimer()
@@ -118,23 +123,36 @@ void MainWindow::UpdateFace()
 
 void MainWindow::UpdateFace1()
 {
+#if REAL_MODE
+	if (!dem_running) {
+		if (raw_frame_count_ > 30) {
+			dem_running = true;
+		}
+		return;
+	}
+#else
+#endif
+
+	//return;
 	Eigen::MatrixXd m;
 
 	std::unique_lock<std::mutex> lock(tmanager->local_expression_lock_);
 	tmanager->local_new_expression_.wait(lock, 
 		//1000ms,
 		[this] { return (count1 != (tmanager->local_expression_count_)); });
-	if (count1 != tmanager->local_expression_count_) {
+
 		count1 = tmanager->local_expression_count_;
 		m = tmanager->local_expression_;
 		lock.unlock();
-	}
-	else {
-		if(lock.owns_lock())
-			lock.unlock();
-		//return;
-	}
-	//m = tmanager->local_expression_;
+	//if (count1 != tmanager->local_expression_count_) {
+	//	count1 = tmanager->local_expression_count_;
+	//	m = tmanager->local_expression_;
+	//	lock.unlock();
+	//}
+	//else {
+	//	if(lock.owns_lock())
+	//		lock.unlock();
+	//}
 
 	double angle_axis[6];
 	memcpy(angle_axis, motion_param[frame_ptr_], 6 * sizeof(double));
@@ -147,10 +165,10 @@ void MainWindow::UpdateFace1()
 	QVector3D trans;
 	QQuaternion Quat;
 	trans = QVector3D(angle_axis[3], angle_axis[4], angle_axis[5]);
+	std::cout << angle_axis[3] << " " << angle_axis[4] << " " << angle_axis[5] << "\n";
 	float angle = std::sqrt(angle_axis[0] * angle_axis[0] + angle_axis[1] * angle_axis[1] + angle_axis[2] * angle_axis[2]);
 	float s = std::sin(angle / 2) / angle;
 	Quat = QQuaternion((float)std::cos(angle / 2), (float)angle_axis[0] * s, (float)angle_axis[1] * s, (float)angle_axis[2] * s);
-
 	glWidget->updateFaceGeometry(m, trans, Quat);
 
 	static int total = 0;

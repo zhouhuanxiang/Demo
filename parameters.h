@@ -3,7 +3,7 @@
 
 #define USE_KINECT 0
 #define USE_LAPTOP 0
-#define REAL_MODE 0
+#define REAL_MODE 1
 
 #include <set>
 #include <vector>

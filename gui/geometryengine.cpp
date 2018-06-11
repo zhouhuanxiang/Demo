@@ -113,6 +113,9 @@ void GeometryEngine::setConstant(QOpenGLShaderProgram *program)
 
 void GeometryEngine::updateFaceGeometry(Eigen::MatrixXd &pos)
 {
+	if (local_pos_.rows() != 3 * vertex_size || pos.rows() != 3 * vertex_size)
+		return;
+
 	for (int i = 0; i < 3 * vertex_size; i++) {
 		local_pos_(i) = pos(i, 0);
 	}

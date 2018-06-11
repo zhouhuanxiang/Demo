@@ -207,7 +207,7 @@ template <class T>
 bool CeresInitializationRegulation::operator()(const T* const pca_coeff, T* residuals) const
 {
 	for (int i = 0; i < pca_size; i++){
-		residuals[i] = ((T)pca_coeff[i]) * pca_weights(i) * 50.0;
+		residuals[i] = ((T)pca_coeff[i]) * pca_weights(i) * 100.0;
 		////std::cout << residuals[i] << "\n";
 	}
 	////std::cout << "\n";

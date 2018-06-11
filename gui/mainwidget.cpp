@@ -141,10 +141,16 @@ void MainWidget::paintGL()
 		geometries->setConstant(&program);
 		first = false;
 	}
+
+	//return;
+
 	if (dem_init_done) {
 		geometries->setNormal(&program);
 		dem_init_done = false;
 	}
+
+	//return;
+
 	geometries->updateFaceGeometry(local_pos_);
 
 	geometries->drawFaceGeometry(&program);

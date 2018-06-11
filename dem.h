@@ -86,7 +86,10 @@ extern Matrix<double, 3, 3> rgb_camera_project_;
 //extern Matrix<double, 3, 3> rgb_camera_reproject_;
 
 extern DlibLandmarkDetector landmark_detector_;
+#if REAL_MODE
+#else
 extern ImageReaderKinect image_reader;
+#endif
 
 void DEM();
 

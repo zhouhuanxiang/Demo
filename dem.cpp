@@ -66,7 +66,10 @@ Matrix<double, 3, 3> rgb_camera_reproject_;
 
 DlibLandmarkDetector landmark_detector_;
 
+#if REAL_MODE
+#else
 ImageReaderKinect image_reader;
+#endif
 
 void DEM()
 {
@@ -88,11 +91,11 @@ void DEM()
 #else
 	raw_frame_ptr_ = 0;
 	raw_frame_count_ = 0;
-	raw_dframes_.resize(raw_frame_size, cv::Mat(dframe_height, dframe_width, CV_8UC3));
-	raw_cframes_.resize(raw_frame_size, cv::Mat(cframe_height, cframe_width, CV_32FC3));
+	raw_dframes_.resize(raw_frame_size, cv::Mat(dframe_height, dframe_width, CV_32FC3));
+	raw_cframes_.resize(raw_frame_size, cv::Mat(cframe_height, cframe_width, CV_8UC3));
 	//
-	dframes_.resize(frame_size, cv::Mat(dframe_height, dframe_width, CV_8UC3));
-	cframes_.resize(frame_size, cv::Mat(cframe_height, cframe_width, CV_32FC3));
+	dframes_.resize(frame_size, cv::Mat(dframe_height, dframe_width, CV_32FC3));
+	cframes_.resize(frame_size, cv::Mat(cframe_height, cframe_width, CV_8UC3));
 #endif
 	//
 	depth_camera_project_ <<
@@ -168,7 +171,10 @@ void DEM()
 	UpdateExpressionFaceCPU();
 	UpdateNormalCPU();
 
+#if REAL_MODE
+#else
 	image_reader.GetFrames();
+#endif
 }
 
 void Initialize()
@@ -501,7 +507,7 @@ void Track()
 	MouthTrack();
 	//EyeMouthTrack();
 	//
-	LOG(INFO) << "X: " << Map<RowVectorXd>(x_coeff_eg_.data(), exp_size);
+	//LOG(INFO) << "X: " << Map<RowVectorXd>(x_coeff_eg_.data(), exp_size);
 	// output
 	std::chrono::steady_clock::time_point tp3 = std::chrono::steady_clock::now();
 	UpdateExpressionFaceCPU();
@@ -591,8 +597,8 @@ void EyeMouthTrack()
 
 void EyeTrack()
 {
-	const static double lambda1 = 15.0;
-	const static double lambda2 = 50.0;
+	const static double lambda1 = 20.0;
+	const static double lambda2 = 20.0;
 	//const static double lambda1 = 250.0;
 	//const static double lambda2 = 500.0;
 	// X
@@ -666,8 +672,8 @@ void EyeTrack()
 
 void MouthTrack()
 {
-	const static double lambda1 = 150.0;
-	const static double lambda2 = 500.0;
+	const static double lambda1 = 200.0;
+	const static double lambda2 = 200.0;
 	// X
 	MatrixXd X(2 * mouth_landmark_size + mouth_exp_size, mouth_exp_size);
 	X.setZero();

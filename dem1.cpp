@@ -95,10 +95,21 @@ void UpdateMotion(cv::Mat &dframe, std::vector<Eigen::Vector2d> pts,
 
 bool UpdateFrame(bool force_motion)
 {
+#if REAL_MODE
+	if (frame_count_ == raw_frame_count_) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		return false;
+	}
+	frame_count_ = raw_frame_count_;
+	frame_ptr_ = frame_count_ % frame_size;
+	cframes_[frame_ptr_] = raw_cframes_[frame_count_ % raw_frame_size];
+	dframes_[frame_ptr_] = raw_dframes_[frame_count_ % raw_frame_size];
+#else
 	frame_ptr_ = frame_count_ % frame_size;
 	//static ImageReaderKinect image_reader(Kinect_Data_Dir);
 	image_reader.GetFrame(frame_count_, cframes_[frame_ptr_], dframes_[frame_ptr_]);
 	//return true;
+#endif
 	bool result = landmark_detector_.Detect(cframes_[frame_ptr_], frame_count_, false);
 	if (!result) {
 		std::cout << "wrong";
